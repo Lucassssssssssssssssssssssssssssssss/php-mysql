@@ -1,49 +1,47 @@
 <?php
-// Déclaration du tableau associatif des recettes
-$recipes = [
-    [
-        'title' => 'Cassoulet',
-        'recipe' => 'Etape 1 : flageolets, Etape 2 : mijoter...',
-        'author' => 'mickael.andrieu@exemple.com',
-        'enabled' => true
-    ],
-    [
-        'title' => 'Couscous',
-        'recipe' => 'Etape 1 : légumes, Etape 2 : semoule...',
-        'author' => 'mickael.andrieu@exemple.com',
-        'enabled' => false
-    ],
-    [
-        'title' => 'Escalope milanaise',
-        'recipe' => 'Etape 1 : paner, Etape 2 : cuire...',
-        'author' => 'mathieu.nebra@exemple.com',
-        'enabled' => true
-    ]
-];
+// Inclusion des données (utilisateurs + recettes)
+include_once('recettes.php');
+
+// Vérifie si une recette est valide
+function isValidRecipe($recipe) {
+    return isset($recipe['is_enabled']) && $recipe['is_enabled'];
+}
+
+// Récupère uniquement les recettes valides
+function getRecipes($recipes) {
+    $validRecipes = array();
+    foreach ($recipes as $recipe) {
+        if (isValidRecipe($recipe)) {
+            $validRecipes[] = $recipe;
+        }
+    }
+    return $validRecipes;
+}
+
+// Retourne le nom et l’âge d’un auteur à partir de son email
+function displayAuthor($authorEmail, $users) {
+    foreach ($users as $user) {
+        if ($user['email'] === $authorEmail) {
+            return $user['full_name'] . ' (' . $user['age'] . ' ans)';
+        }
+    }
+    return 'Auteur inconnu';
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <title>Affichage des recettes</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #f9f9f9; }
-        .recipe { margin: 10px; padding: 15px; border: 1px solid #ccc; border-radius: 8px; background: #fff; }
-        .recipe h3 { margin: 0; color: #2c3e50; }
-        .recipe p { margin: 5px 0; }
-        .author { font-size: 0.9em; color: #888; }
-    </style>
 </head>
 <body>
     <h1>Liste des recettes activées</h1>
-    <?php foreach ($recipes as $recipe): ?>
-        <?php if ($recipe['enabled']): ?>
-            <div class="recipe">
-                <h3><?php echo $recipe['title']; ?></h3>
-                <p><?php echo $recipe['recipe']; ?></p>
-                <p class="author">Auteur : <?php echo $recipe['author']; ?></p>
-            </div>
-        <?php endif; ?>
+    <?php foreach (getRecipes($recipes) as $recipe): ?>
+        <article>
+            <h3><?php echo $recipe['title']; ?></h3>
+            <div><?php echo $recipe['recipe']; ?></div>
+            <i><?php echo displayAuthor($recipe['author'], $users); ?></i>
+        </article>
     <?php endforeach; ?>
 </body>
 </html>
