@@ -3,7 +3,7 @@
 $users = [
     [
         'full_name' => 'Mickaël Andrieu',
-        'email' => 'mickael.andrieu@exemple.com'
+        'email' => 'mickael.andrieu@exemple.com',
         'age' => 34,
     ],
     [
@@ -41,12 +41,12 @@ $recipes = [
         'title' => 'Salade Romaine',
         'recipe' => '',
         'author' => 'laurene.castor@exemple.com',
-        'is_enablad' => false,
+        'is_enabled' => false,
     ],
 ];
 
-function display_recipe(array $recipe) : string
-{
+// Fonction pour afficher une recette
+function display_recipe($recipe) {
     $recipe_content = '';
 
     if ($recipe['is_enabled']) {
@@ -57,21 +57,21 @@ function display_recipe(array $recipe) : string
         $recipe_content .= '</article>';
     }
     
-    return $recipe;
+    return $recipe_content;
 }
 
-function display_author(string $authorEmail, array $users) : string
-{
-    for ($i = 0; $i < count($users); $i++) {
-        $author = $users[$i];
+// Fonction pour afficher l'auteur à partir de son email
+function display_author($authorEmail, $users) {
+    foreach ($users as $author) {
         if ($authorEmail === $author['email']) {
-            return $author['full_name'] . '(' . $author['age'] . ' ans)';
+            return $author['full_name'] . ' (' . $author['age'] . ' ans)';
         }
     }
+    return "Auteur inconnu";
 }
 
-function get_recipes(array $recipes) : array
-{
+// Fonction pour filtrer uniquement les recettes valides
+function get_recipes($recipes) {
     $valid_recipes = [];
 
     foreach($recipes as $recipe) {
@@ -85,9 +85,10 @@ function get_recipes(array $recipes) : array
 
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-    <title>Les recettes mais page blanche :(</title>
+    <meta charset="UTF-8">
+    <title>Les recettes corrigées</title>
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" 
         rel="stylesheet"
@@ -96,12 +97,11 @@ function get_recipes(array $recipes) : array
 <body>
     <div class="container">
         <h1>Liste des recettes</h1>
-        <!-- Plus facile à lire -->
         <?php foreach(get_recipes($recipes) as $recipe) : ?>
             <article>
-                <h3><?php echo($recipe['title']); ?></h3>
-                <div><?php echo($recipe['recipe']); ?></div>
-                <i><?php echo(display_author($recipe['author'], $users)); ?></i>
+                <h3><?php echo $recipe['title']; ?></h3>
+                <div><?php echo $recipe['recipe']; ?></div>
+                <i><?php echo display_author($recipe['author'], $users); ?></i>
             </article>
         <?php endforeach ?>
     </div>   
