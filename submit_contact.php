@@ -47,8 +47,8 @@
                         if (in_array($extension, $allowedExtensions))
                         {
                             // On peut valider le fichier et le stocker définitivement
-                            move_uploaded_file($_FILES['screenshot']['tmp_name'],
-                            'uploads/' . basename($_FILES['screenshot']['name']));
+                            echo($_FILES['screenshot']['tmp_name']);
+                            move_uploaded_file($_FILES['screenshot']['tmp_name'], 'uploads/' . basename($_FILES['screenshot']['name']));
                             echo "L'envoi a bien été effectué !";
                         }
                     }
