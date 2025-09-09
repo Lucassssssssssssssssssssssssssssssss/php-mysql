@@ -30,8 +30,8 @@
                 return;
                 }
             ?>
-            <p class="card-text"><b>Email</b> : <?php echo $_POST['email']; ?> </p>
-            <p class="card-text"><b>Message</b> : <?php echo $_POST['message']; ?> </p>
+            <p class="card-text"><b>Email</b> : <?php echo htmlspecialchars($_POST['email']); ?> </p>
+            <p class="card-text"><b>Message</b> : <?php echo htmlspecialchars($_POST['message']); ?> </p>
         </div>
     </div>
 
