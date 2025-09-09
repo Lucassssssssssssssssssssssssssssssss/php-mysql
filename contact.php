@@ -17,7 +17,8 @@
 
     <h1>Contactez nous</h1>
 
-    <form action="submit_contact.php" method="post" class="mt-4">
+    <form action="submit_contact.php" method="post" enctype="multipart/form-data" class="mt-4">
+        <!-- Ajout des champs email et message -->
         <div class="mb-3">
             <label for="email" class="form-label">Email</label>
             <input type="email" id="email" name="email" class="form-control">
@@ -29,6 +30,13 @@
             <textarea id="message" name="message" rows="4" class="form-control" placeholder="Exprimez-vous"></textarea>
         </div>
 
+        <!-- Ajout champ d'upload ! -->
+        <div class="mb-3">
+            <label for="screenshot" class="form-label">Votre capture d'écran</label>
+            <input type="file" class="form-control" id="screenshot" name="screenshot" />
+        </div>
+
+        <!-- Fin ajout du champ -->
         <button type="submit" class="btn btn-primary">Envoyer</button>
     </form>
 
