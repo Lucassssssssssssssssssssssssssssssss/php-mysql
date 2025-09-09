@@ -17,7 +17,7 @@
 
     <h1>Contactez nous</h1>
 
-    <form action="submit_contact.php" method="get" class="mt-4">
+    <form action="submit_contact.php" method="post" class="mt-4">
         <div class="mb-3">
             <label for="email" class="form-label">Email</label>
             <input type="email" id="email" name="email" class="form-control">
