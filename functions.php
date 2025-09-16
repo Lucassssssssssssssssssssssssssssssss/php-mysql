@@ -1,6 +1,6 @@
 <?php
 // Inclusion des données (utilisateurs + recettes)
-include_once('recettes.php');
+include_once('variables.php');
 
 // Vérifie si une recette est valide
 function isValidRecipe($recipe) {
