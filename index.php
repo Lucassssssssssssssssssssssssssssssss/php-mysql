@@ -1,4 +1,4 @@
-<?php
+<?php 
 session_start();
 ?>
 
@@ -31,8 +31,8 @@ session_start();
 
         <h1>Site de Recettes !</h1>
 
-        <!-- Si l'utilisateur existe, on affiche les recettes -->
-        <?php if (isset($loggedUser)): ?>
+        <!-- Si l'utilisateur est connecté, on affiche les recettes -->
+        <?php if (isset($_SESSION['LOGGED_USER'])): ?>
             <?php foreach (getRecipes($recipes) as $recipe): ?>
               <article class="mb-3">
                 <h3><?php echo $recipe['title']; ?></h3>
