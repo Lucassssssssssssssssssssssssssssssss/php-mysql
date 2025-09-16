@@ -1,6 +1,8 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+// Déconnexion
+if (isset($_POST['logout'])) {
+    setcookie('LOGGED_USER', '', time() - 3600, "", "", true, true); // suppression cookie
+    unset($loggedUser);
 }
 
 // Validation du formulaire
@@ -12,19 +14,41 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
             $user['email'] === $_POST['email'] &&
             $user['password'] === $_POST['password']
         ) {
-            $_SESSION['LOGGED_USER'] = $user['email'];
+            // Connexion réussie
+            $loggedUser = ['email' => $user['email']];
             $isAuthenticated = true;
+
+            // Cookie qui expire dans un an
+            setcookie(
+                'LOGGED_USER',
+                $loggedUser['email'],
+                time() + 365 * 24 * 3600,
+                "",
+                "",
+                true,
+                true
+            );
+            break;
         }
     }
 
     if (!$isAuthenticated) {
-        $errorMessage = "Email ou mot de passe incorrect.";
+        $errorMessage = sprintf(
+            'Les informations envoyées ne permettent pas de vous identifier : (%s/%s)',
+            $_POST['email'],
+            $_POST['password']
+        );
     }
+}
+
+// Si le cookie est présent, on restaure l'utilisateur connecté
+if (isset($_COOKIE['LOGGED_USER'])) {
+    $loggedUser = ['email' => $_COOKIE['LOGGED_USER']];
 }
 ?>
 
-<!-- Si utilisateur non identifié, on affiche le formulaire -->
-<?php if (!isset($_SESSION['LOGGED_USER'])): ?>
+<!-- Si utilisateur/trice est non identifié(e), on affiche le formulaire -->
+<?php if (!isset($loggedUser)): ?>
 
 <form action="index.php" method="post">
     <!-- si message d'erreur on l'affiche -->
@@ -51,9 +75,12 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
     <button type="submit" class="btn btn-primary">Connexion</button>
 </form>
 
-<!-- Si utilisateur bien connecté on affiche un message de succès -->
+<!-- Si utilisateur/trice bien connecté(e) on affiche un message de succès -->
 <?php else: ?>
-    <div class="alert alert-success" role="alert">
-        Bonjour et bienvenue sur le site <?php echo $_SESSION['LOGGED_USER']; ?> !
+    <div class="alert alert-success d-flex justify-content-between align-items-center" role="alert">
+        <span>Bonjour <?php echo htmlspecialchars($loggedUser['email']); ?> et bienvenue sur le site !</span>
+        <form action="index.php" method="post" class="m-0">
+            <button type="submit" name="logout" class="btn btn-danger btn-sm">Déconnexion</button>
+        </form>
     </div>
 <?php endif; ?>
