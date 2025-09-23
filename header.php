@@ -1,4 +1,4 @@
-<nav class="navbar navbar-light bg-light mb-4">
+<nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
     <div class="container-fluid">
         <a class="navbar-brand" href="#">Site de recettes</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -7,7 +7,6 @@
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <!-- Menu dépliable -->
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
