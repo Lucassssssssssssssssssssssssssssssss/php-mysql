@@ -49,23 +49,16 @@ session_start();
         <?php 
         // Connexion à la base
         include_once('mysql.php'); 
+        if (!$db) die("Erreur de connexion à la base de données.");
 
-        // Vérification que la connexion marche
-        if (!$db) {
-            die("Erreur de connexion à la base de données.");
-        }
-
-        // Inclusion des fonctions
         include_once('functions.php'); 
-
-        // Formulaire ou message de connexion
         include_once('login.php'); 
 
-        // --- TRAITEMENT DU FORMULAIRE AJOUT DE RECETTE ---
-        if (isset($loggedUser) && !empty($_POST['title']) && !empty($_POST['recipe'])) {
+        // --- AJOUT D’UNE RECETTE ---
+        if (isset($loggedUser) && !empty($_POST['title']) && !empty($_POST['recipe']) && !isset($_POST['update_id'])) {
             $title = trim($_POST['title']);
             $recipeText = trim($_POST['recipe']);
-            $author = $loggedUser['email']; // auteur = utilisateur connecté
+            $author = $loggedUser['email']; 
             $is_enabled = 1;
 
             try {
@@ -84,6 +77,30 @@ session_start();
             }
         }
 
+        // --- MODIFICATION D’UNE RECETTE ---
+        if (isset($loggedUser) && !empty($_POST['title']) && !empty($_POST['recipe']) && isset($_POST['update_id'])) {
+            $title = trim($_POST['title']);
+            $recipeText = trim($_POST['recipe']);
+            $recipeId = (int) $_POST['update_id'];
+            $author = $loggedUser['email'];
+
+            try {
+                $sqlQuery = 'UPDATE recipes 
+                             SET title = :title, recipe = :recipe 
+                             WHERE recipe_id = :id AND author = :author';
+                $updateRecipe = $db->prepare($sqlQuery);
+                $updateRecipe->execute([
+                    'title' => $title,
+                    'recipe' => $recipeText,
+                    'id' => $recipeId,
+                    'author' => $author
+                ]);
+                echo '<div class="alert alert-success mt-3">✏️ Recette modifiée avec succès !</div>';
+            } catch (Exception $e) {
+                echo '<div class="alert alert-danger mt-3">Erreur SQL : ' . htmlspecialchars($e->getMessage()) . '</div>';
+            }
+        }
+
         // Récupération des recettes valides
         try {
             $sqlQuery = 'SELECT * FROM recipes WHERE is_enabled = 1';
@@ -95,10 +112,49 @@ session_start();
         }
         ?>
 
-        <!-- Si connecté, afficher formulaire + recettes -->
+        <!-- Si connecté -->
         <?php if (isset($loggedUser)): ?>
+
+            <!-- Formulaire d'ajout ou d'édition -->
+            <?php if (isset($_GET['edit'])): 
+                $editId = (int) $_GET['edit'];
+                // Charger la recette à éditer si elle appartient à l'utilisateur
+                $sql = "SELECT * FROM recipes WHERE recipe_id = :id AND author = :author";
+                $stmt = $db->prepare($sql);
+                $stmt->execute([
+                    'id' => $editId,
+                    'author' => $loggedUser['email']
+                ]);
+                $recipeToEdit = $stmt->fetch(PDO::FETCH_ASSOC);
+            ?>
+
+            <?php if ($recipeToEdit): ?>
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    ✏️ Modifier la recette
+                </div>
+                <div class="card-body">
+                    <form method="post" action="index.php">
+                        <input type="hidden" name="update_id" value="<?php echo $recipeToEdit['recipe_id']; ?>">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Titre</label>
+                            <input type="text" class="form-control" id="title" name="title" 
+                                   value="<?php echo htmlspecialchars($recipeToEdit['title']); ?>" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="recipe" class="form-label">Recette</label>
+                            <textarea class="form-control" id="recipe" name="recipe" rows="4" required><?php 
+                                echo htmlspecialchars($recipeToEdit['recipe']); ?></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-warning">Mettre à jour</button>
+                        <a href="index.php" class="btn btn-secondary">Annuler</a>
+                    </form>
+                </div>
+            </div>
+            <?php endif; ?>
             
-            <!-- Formulaire d'ajout de recette -->
+            <?php else: ?>
+            <!-- Formulaire d'ajout (par défaut) -->
             <div class="card mb-4">
                 <div class="card-header bg-primary text-white">
                     ✍️ Ajouter une nouvelle recette
@@ -117,6 +173,7 @@ session_start();
                     </form>
                 </div>
             </div>
+            <?php endif; ?>
 
             <!-- Affichage des recettes -->
             <div class="row mt-4">
@@ -131,8 +188,11 @@ session_start();
                                     <?php echo nl2br(htmlspecialchars($recipe['recipe'])); ?>
                                 </p>
                             </div>
-                            <div class="card-footer text-muted">
-                                <?php echo displayAuthor($recipe['author'], $users); ?>
+                            <div class="card-footer text-muted d-flex justify-content-between align-items-center">
+                                <span><?php echo displayAuthor($recipe['author'], $users); ?></span>
+                                <?php if ($recipe['author'] === $loggedUser['email']): ?>
+                                    <a href="index.php?edit=<?php echo $recipe['recipe_id']; ?>" class="btn btn-sm btn-warning">Modifier</a>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -146,5 +206,4 @@ session_start();
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>
