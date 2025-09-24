@@ -101,6 +101,24 @@ session_start();
             }
         }
 
+        // --- SUPPRESSION D’UNE RECETTE ---
+        if (isset($loggedUser) && isset($_GET['delete'])) {
+            $deleteId = (int) $_GET['delete'];
+            $author = $loggedUser['email'];
+
+            try {
+                $sqlQuery = 'DELETE FROM recipes WHERE recipe_id = :id AND author = :author';
+                $deleteRecipe = $db->prepare($sqlQuery);
+                $deleteRecipe->execute([
+                    'id' => $deleteId,
+                    'author' => $author
+                ]);
+                echo '<div class="alert alert-success mt-3">🗑️ Recette supprimée avec succès !</div>';
+            } catch (Exception $e) {
+                echo '<div class="alert alert-danger mt-3">Erreur SQL : ' . htmlspecialchars($e->getMessage()) . '</div>';
+            }
+        }
+
         // Récupération des recettes valides
         try {
             $sqlQuery = 'SELECT * FROM recipes WHERE is_enabled = 1';
@@ -115,10 +133,9 @@ session_start();
         <!-- Si connecté -->
         <?php if (isset($loggedUser)): ?>
 
-            <!-- Formulaire d'ajout ou d'édition -->
+            <!-- Formulaire ajout/édition -->
             <?php if (isset($_GET['edit'])): 
                 $editId = (int) $_GET['edit'];
-                // Charger la recette à éditer si elle appartient à l'utilisateur
                 $sql = "SELECT * FROM recipes WHERE recipe_id = :id AND author = :author";
                 $stmt = $db->prepare($sql);
                 $stmt->execute([
@@ -154,7 +171,7 @@ session_start();
             <?php endif; ?>
             
             <?php else: ?>
-            <!-- Formulaire d'ajout (par défaut) -->
+            <!-- Formulaire ajout (par défaut) -->
             <div class="card mb-4">
                 <div class="card-header bg-primary text-white">
                     ✍️ Ajouter une nouvelle recette
@@ -191,7 +208,10 @@ session_start();
                             <div class="card-footer text-muted d-flex justify-content-between align-items-center">
                                 <span><?php echo displayAuthor($recipe['author'], $users); ?></span>
                                 <?php if ($recipe['author'] === $loggedUser['email']): ?>
-                                    <a href="index.php?edit=<?php echo $recipe['recipe_id']; ?>" class="btn btn-sm btn-warning">Modifier</a>
+                                    <div class="btn-group">
+                                        <a href="index.php?edit=<?php echo $recipe['recipe_id']; ?>" class="btn btn-sm btn-warning">Modifier</a>
+                                        <a href="index.php?delete=<?php echo $recipe['recipe_id']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Supprimer cette recette ?');">Supprimer</a>
+                                    </div>
                                 <?php endif; ?>
                             </div>
                         </div>
