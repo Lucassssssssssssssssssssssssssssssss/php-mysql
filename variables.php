@@ -21,6 +21,7 @@ $users = [
     ],
 ];
 
+/*
 $recipes = [
     [
         'title' => 'Cassoulet',
@@ -49,3 +50,4 @@ $recipes = [
 ];
 
 ?>
+*/
