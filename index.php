@@ -55,6 +55,35 @@ session_start();
             die("Erreur de connexion à la base de données.");
         }
 
+        // Inclusion des fonctions
+        include_once('functions.php'); 
+
+        // Formulaire ou message de connexion
+        include_once('login.php'); 
+
+        // --- TRAITEMENT DU FORMULAIRE AJOUT DE RECETTE ---
+        if (isset($loggedUser) && !empty($_POST['title']) && !empty($_POST['recipe'])) {
+            $title = trim($_POST['title']);
+            $recipeText = trim($_POST['recipe']);
+            $author = $loggedUser['email']; // auteur = utilisateur connecté
+            $is_enabled = 1;
+
+            try {
+                $sqlQuery = 'INSERT INTO recipes (title, recipe, author, is_enabled) 
+                             VALUES (:title, :recipe, :author, :is_enabled)';
+                $insertRecipe = $db->prepare($sqlQuery);
+                $insertRecipe->execute([
+                    'title' => $title,
+                    'recipe' => $recipeText,
+                    'author' => $author,
+                    'is_enabled' => $is_enabled
+                ]);
+                echo '<div class="alert alert-success mt-3">✅ Recette ajoutée avec succès !</div>';
+            } catch (Exception $e) {
+                echo '<div class="alert alert-danger mt-3">Erreur SQL : ' . htmlspecialchars($e->getMessage()) . '</div>';
+            }
+        }
+
         // Récupération des recettes valides
         try {
             $sqlQuery = 'SELECT * FROM recipes WHERE is_enabled = 1';
@@ -64,16 +93,32 @@ session_start();
         } catch (Exception $e) {
             die('Erreur SQL : ' . $e->getMessage());
         }
-
-        // Inclusion des fonctions
-        include_once('functions.php'); 
-
-        // Formulaire ou message de connexion
-        include_once('login.php'); 
         ?>
 
-        <!-- Affichage des recettes si connecté -->
+        <!-- Si connecté, afficher formulaire + recettes -->
         <?php if (isset($loggedUser)): ?>
+            
+            <!-- Formulaire d'ajout de recette -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    ✍️ Ajouter une nouvelle recette
+                </div>
+                <div class="card-body">
+                    <form method="post" action="index.php">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Titre</label>
+                            <input type="text" class="form-control" id="title" name="title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="recipe" class="form-label">Recette</label>
+                            <textarea class="form-control" id="recipe" name="recipe" rows="4" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success">Ajouter</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Affichage des recettes -->
             <div class="row mt-4">
                 <?php foreach (getRecipes($recipes) as $recipe): ?>
                     <div class="col-md-6 col-lg-4 mb-4">
